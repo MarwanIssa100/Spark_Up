@@ -1,0 +1,114 @@
+<!doctype html>
+<html>
+  <head>
+    <title>SparkUp</title>
+    <style>
+      body {
+        padding: 20px 60px;
+        font-family: sans-serif;
+        font-size: 1.2rem;
+      }
+
+      section {
+        margin-bottom: 40px;
+        padding: 20px;
+        border: 1px solid #aaa;
+        border-radius: 8px;
+      }
+
+      input, textarea, button {
+        font-size: 1rem;
+        margin: 5px 0;
+        display: block;
+        width: 100%;
+        padding: 8px;
+      }
+
+      #result {
+        margin-top: 20px;
+        padding: 10px;
+        border: 1px dashed #444;
+        background-color: #f4f4f4;
+      }
+    </style>
+
+    <script type="module">
+      import { backend } from "declarations/backend";
+
+      // Create Idea
+      document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById("createForm").addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const title = document.getElementById("title").value.toString();
+          const desc = document.getElementById("desc").value.toString();
+          const goal = BigInt(document.getElementById("goal").value);
+          const deadline = BigInt(document.getElementById("deadline").value);
+          await backend.create_idea(title, desc, goal, deadline);
+          document.getElementById("result").innerText = "✅ Idea created!";
+        });
+
+        // Fund Idea
+        document.getElementById("fundForm").addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const id = parseInt(document.getElementById("fundId").value);
+          const amount = BigInt(document.getElementById("amount").value);
+          await backend.fund_idea(id, { amount });
+          document.getElementById("result").innerText = `Funded idea ${id} with ${amount}`;
+        });
+
+        // Get Idea
+        document.getElementById("getForm").addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const id = parseInt(document.getElementById("getId").value);
+          const idea = await backend.get_idea(id);
+          if (idea) {
+            document.getElementById("result").innerText = 
+              `📄 Idea #${id}\nTitle: ${idea.title}\nDesc: ${idea.description}\nGoal: ${idea.fund_goal}\nRaised: ${idea.amount_collected}\nDeadline: ${idea.deadline}\nCompleted: ${idea.completed}`;
+          } else {
+            document.getElementById("result").innerText = "⚠ Idea not found";
+          }
+        });
+      });
+    </script>
+  </head>
+
+  <body>
+    <main>
+      <h1>🔥 SparkUp Crowdfunding</h1>
+
+      <!-- Create Idea -->
+      <section>
+        <h2>Create Idea</h2>
+        <form id="createForm">
+          <input id="title" type="text" placeholder="Title" required />
+          <textarea id="desc" placeholder="Description" required></textarea>
+          <input id="goal" type="number" placeholder="Funding Goal" required />
+          <input id="deadline" type="number" placeholder="Deadline Timestamp" required />
+          <button type="submit">Create</button>
+        </form>
+      </section>
+
+      <!-- Fund Idea -->
+      <section>
+        <h2>Fund Idea</h2>
+        <form id="fundForm">
+          <input id="fundId" type="number" placeholder="Idea ID" required />
+          <input id="amount" type="number" placeholder="Amount" required />
+          <button type="submit">Fund</button>
+        </form>
+      </section>
+
+      <!-- Get Idea -->
+      <section>
+        <h2>Get Idea</h2>
+        <form id="getForm">
+          <input id="getId" type="number" placeholder="Idea ID" required />
+          <button type="submit">Get Details</button>
+        </form>
+      </section>
+
+      <!-- Output -->
+      <div id="result"></div>
+    </main>
+  </body>
+</html>
